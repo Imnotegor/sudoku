@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#ffffff" />
+    <title>Судоку офлайн</title>
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="stylesheet" href="./styles.css" />
+    <link rel="icon" href="./favicon-32.png" type="image/png" />
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+  </head>
+  <body>
+    <main class="wrap">
+      <header class="hero">
+        <div>
+          <p class="eyebrow" data-i18n="eyebrow">Судоку</p>
+          <h1 data-i18n="hero_title">Играйте без интернета на любом устройстве</h1>
+          <p class="sub" data-i18n="hero_sub">Автосохранение прогресса, адаптивная сетка и уровни сложности.</p>
+        </div>
+        <div class="status">
+          <div class="badge" id="difficulty-label">Сложность: —</div>
+          <div class="timer" id="timer">00:00</div>
+          <div class="badge" id="online-status">Онлайн</div>
+        </div>
+      </header>
+
+      <section class="game">
+        <div class="board" id="board" role="grid" aria-label="Поле судоку"></div>
+
+        <aside class="panel">
+          <div class="panel-section">
+            <h2 data-i18n="difficulty_heading">Сложность</h2>
+            <div class="difficulty" id="difficulty">
+              <button class="pill" data-level="easy" data-i18n="difficulty_easy">Легко</button>
+              <button class="pill" data-level="medium" data-i18n="difficulty_medium">Нормально</button>
+              <button class="pill" data-level="hard" data-i18n="difficulty_hard">Сложно</button>
+              <button class="pill" data-level="expert" data-i18n="difficulty_expert">Эксперт</button>
+            </div>
+          </div>
+
+          <div class="panel-section">
+            <h2 data-i18n="actions_heading">Действия</h2>
+            <div class="actions">
+              <button class="action" id="new-game" data-i18n="new_game">Новая игра</button>
+              <button class="action" id="clear-cell" data-i18n="clear_cell">Очистить</button>
+              <button class="action" id="show-solution" data-i18n="show_solution">Показать решение</button>
+            </div>
+          </div>
+
+          <div class="panel-section">
+            <h2 data-i18n="numbers_heading">Числа</h2>
+            <div class="numpad" id="numpad"></div>
+            <p class="hint" data-i18n="hint">Можно вводить цифры 1–9 с клавиатуры. Стрелки перемещают выделение.</p>
+          </div>
+        </aside>
+      </section>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

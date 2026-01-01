@@ -1,0 +1,14 @@
+.DS_Store
+.idea/
+.vscode/
+.env
+.env.*
+node_modules/
+coverage/
+build/
+dist/
+*.log
+*.tmp
+*.swp
+*.swo
+*.zip
