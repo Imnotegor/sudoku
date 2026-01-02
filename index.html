@@ -43,12 +43,41 @@
             <h2 data-i18n="actions_heading">Действия</h2>
             <div class="actions">
               <button class="action" id="new-game" data-i18n="new_game">Новая игра</button>
+              <button class="action" id="manual-entry" data-i18n="manual_entry">Ручной ввод</button>
+              <button class="action" id="solve-manual" data-i18n="solve_manual">Решить ввод</button>
               <button class="action" id="clear-cell" data-i18n="clear_cell">Очистить</button>
+              <button class="action" id="undo-move" data-i18n="undo">Отменить</button>
+              <button class="action toggle" id="toggle-notes" data-i18n="notes">Заметки</button>
               <button class="action" id="show-solution" data-i18n="show_solution">Показать решение</button>
             </div>
           </div>
 
-          <div class="panel-section">
+          <div class="panel-section manual-section">
+            <h2 data-i18n="manual_heading">Ручной ввод</h2>
+            <textarea
+              inputmode="text"
+              class="manual-input"
+              id="manual-input"
+              data-i18n="manual_placeholder"
+              data-i18n-attr="placeholder"
+              rows="9"
+            ></textarea>
+            <div class="actions manual-actions">
+              <button class="action ghost" id="manual-import" data-i18n="manual_import">Импорт</button>
+              <button class="action ghost" id="manual-export" data-i18n="manual_export">Экспорт</button>
+            </div>
+          </div>
+
+          <div class="panel-section scan-section">
+            <h2 data-i18n="scan_heading">Сканирование</h2>
+            <div class="actions scan-actions">
+              <button class="action" id="open-camera" data-i18n="open_camera">Камера</button>
+              <button class="action" id="upload-photo" data-i18n="upload_photo">Загрузить фото</button>
+            </div>
+            <input type="file" id="photo-input" accept="image/*" capture="environment" hidden />
+          </div>
+
+          <div class="panel-section numbers-section">
             <h2 data-i18n="numbers_heading">Числа</h2>
             <div class="numpad" id="numpad"></div>
             <p class="hint" data-i18n="hint">Можно вводить цифры 1–9 с клавиатуры. Стрелки перемещают выделение.</p>
@@ -58,6 +87,16 @@
     </main>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <div class="camera" id="camera" hidden>
+      <div class="camera-shell">
+        <video id="camera-video" autoplay playsinline></video>
+        <div class="camera-actions">
+          <button class="action ghost" id="camera-close" data-i18n="camera_close">Закрыть</button>
+          <button class="action" id="camera-capture" data-i18n="camera_capture">Снять</button>
+        </div>
+      </div>
+    </div>
+    <canvas id="camera-canvas" hidden></canvas>
 
     <script src="./app.js"></script>
   </body>

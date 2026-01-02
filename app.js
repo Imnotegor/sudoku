@@ -16,20 +16,47 @@ const translations = {
     difficulty_heading: "Сложность",
     actions_heading: "Действия",
     numbers_heading: "Числа",
+    scan_heading: "Сканирование",
+    manual_heading: "Ручной ввод",
+    manual_placeholder: "Вставьте 9 строк по 9 символов (1–9, 0 или . для пустых).",
     hint: "Можно вводить цифры 1–9 с клавиатуры. Стрелки перемещают выделение.",
     new_game: "Новая игра",
+    manual_entry: "Ручной ввод",
+    solve_manual: "Решить ввод",
+    manual_import: "Импорт",
+    manual_export: "Экспорт",
     clear_cell: "Очистить",
+    undo: "Отменить",
+    notes: "Заметки",
     show_solution: "Показать решение",
     hide_solution: "Скрыть решение",
+    open_camera: "Камера",
+    upload_photo: "Загрузить фото",
+    camera_close: "Закрыть",
+    camera_capture: "Снять",
     difficulty_label: "Сложность",
     difficulty_easy: "Легко",
     difficulty_medium: "Нормально",
     difficulty_hard: "Сложно",
     difficulty_expert: "Эксперт",
+    difficulty_manual: "Ручной ввод",
     online: "Онлайн",
     offline: "Офлайн",
     toast_new_game: "Новая игра готова",
     toast_solved: "Отлично! Судоку решено.",
+    toast_manual_ready: "Можно вводить судоку вручную.",
+    toast_manual_imported: "Поле загружено.",
+    toast_manual_exported: "Строка готова.",
+    toast_manual_copied: "Скопировано в буфер.",
+    toast_manual_invalid: "Неверный формат. Нужно 81 символ (1–9, 0 или .).",
+    toast_manual_empty: "Введите хотя бы одну цифру.",
+    toast_manual_solved: "Решение готово.",
+    toast_solve_error: "Не удалось решить судоку.",
+    toast_scan_start: "Обрабатываю фото…",
+    toast_scan_done: "Готово! Поле заполнено.",
+    toast_scan_error: "Не удалось распознать фото.",
+    toast_camera_denied: "Нет доступа к камере.",
+    toast_camera_unsupported: "Камера не поддерживается.",
   },
   en: {
     title: "Offline Sudoku",
@@ -40,20 +67,47 @@ const translations = {
     difficulty_heading: "Difficulty",
     actions_heading: "Actions",
     numbers_heading: "Numbers",
+    scan_heading: "Scan",
+    manual_heading: "Manual entry",
+    manual_placeholder: "Paste 9 lines of 9 symbols (1–9, 0 or . for empty).",
     hint: "Use keys 1–9 to enter numbers. Arrow keys move selection.",
     new_game: "New game",
+    manual_entry: "Manual entry",
+    solve_manual: "Solve input",
+    manual_import: "Import",
+    manual_export: "Export",
     clear_cell: "Clear",
+    undo: "Undo",
+    notes: "Notes",
     show_solution: "Show solution",
     hide_solution: "Hide solution",
+    open_camera: "Camera",
+    upload_photo: "Upload photo",
+    camera_close: "Close",
+    camera_capture: "Capture",
     difficulty_label: "Difficulty",
     difficulty_easy: "Easy",
     difficulty_medium: "Medium",
     difficulty_hard: "Hard",
     difficulty_expert: "Expert",
+    difficulty_manual: "Manual entry",
     online: "Online",
     offline: "Offline",
     toast_new_game: "New game ready",
     toast_solved: "Great! Sudoku solved.",
+    toast_manual_ready: "Manual entry ready.",
+    toast_manual_imported: "Grid loaded.",
+    toast_manual_exported: "String ready.",
+    toast_manual_copied: "Copied to clipboard.",
+    toast_manual_invalid: "Invalid format. Need 81 symbols (1–9, 0 or .).",
+    toast_manual_empty: "Enter at least one digit.",
+    toast_manual_solved: "Solution ready.",
+    toast_solve_error: "Could not solve the puzzle.",
+    toast_scan_start: "Processing photo…",
+    toast_scan_done: "Done! Grid filled.",
+    toast_scan_error: "Could not read the photo.",
+    toast_camera_denied: "Camera access denied.",
+    toast_camera_unsupported: "Camera not supported.",
   },
 };
 
@@ -63,10 +117,25 @@ const difficultyLabel = document.getElementById("difficulty-label");
 const timerEl = document.getElementById("timer");
 const onlineStatusEl = document.getElementById("online-status");
 const newGameBtn = document.getElementById("new-game");
+const manualEntryBtn = document.getElementById("manual-entry");
+const solveManualBtn = document.getElementById("solve-manual");
+const manualInput = document.getElementById("manual-input");
+const manualImportBtn = document.getElementById("manual-import");
+const manualExportBtn = document.getElementById("manual-export");
 const clearBtn = document.getElementById("clear-cell");
+const undoBtn = document.getElementById("undo-move");
+const toggleNotesBtn = document.getElementById("toggle-notes");
 const showSolutionBtn = document.getElementById("show-solution");
 const numpadEl = document.getElementById("numpad");
 const toastEl = document.getElementById("toast");
+const openCameraBtn = document.getElementById("open-camera");
+const uploadPhotoBtn = document.getElementById("upload-photo");
+const photoInput = document.getElementById("photo-input");
+const cameraEl = document.getElementById("camera");
+const cameraVideo = document.getElementById("camera-video");
+const cameraCaptureBtn = document.getElementById("camera-capture");
+const cameraCloseBtn = document.getElementById("camera-close");
+const cameraCanvas = document.getElementById("camera-canvas");
 
 let puzzle = [];
 let solution = [];
@@ -79,6 +148,10 @@ let elapsedMs = 0;
 let timerId = null;
 let showingSolution = false;
 let currentLocale = "ru";
+let cameraStream = null;
+let noteMode = false;
+let notes = createEmptyNotes();
+let history = [];
 
 function init() {
   setLocale(detectLocale());
@@ -136,14 +209,30 @@ function bindEvents() {
   });
 
   newGameBtn.addEventListener("click", () => startNewGame());
-  clearBtn.addEventListener("click", () => setCellValue(selected.row, selected.col, 0));
+  manualEntryBtn?.addEventListener("click", startManualEntry);
+  solveManualBtn?.addEventListener("click", solveManualGrid);
+  manualImportBtn?.addEventListener("click", handleManualImport);
+  manualExportBtn?.addEventListener("click", handleManualExport);
+  clearBtn.addEventListener("click", () => clearCell(selected.row, selected.col));
+  undoBtn?.addEventListener("click", undoLastAction);
+  toggleNotesBtn?.addEventListener("click", toggleNotesMode);
   showSolutionBtn.addEventListener("click", toggleSolution);
+  if (openCameraBtn) openCameraBtn.addEventListener("click", openCamera);
+  if (uploadPhotoBtn) uploadPhotoBtn.addEventListener("click", () => photoInput?.click());
+  if (photoInput) photoInput.addEventListener("change", handlePhotoInput);
+  if (cameraCloseBtn) cameraCloseBtn.addEventListener("click", closeCamera);
+  if (cameraCaptureBtn) cameraCaptureBtn.addEventListener("click", captureFromCamera);
 
   numpadEl.addEventListener("click", (event) => {
     const button = event.target.closest("button");
     if (!button) return;
+    if (button.disabled) return;
     const value = Number(button.dataset.value);
-    setCellValue(selected.row, selected.col, value);
+    if (noteMode) {
+      toggleNoteValue(selected.row, selected.col, value);
+    } else {
+      setCellValue(selected.row, selected.col, value);
+    }
   });
 
   document.addEventListener("keydown", handleKeydown);
@@ -155,14 +244,27 @@ function bindEvents() {
 function handleKeydown(event) {
   if (event.defaultPrevented) return;
   const key = event.key;
+  if ((event.ctrlKey || event.metaKey) && key.toLowerCase() === "z") {
+    undoLastAction();
+    event.preventDefault();
+    return;
+  }
   if (key >= "1" && key <= "9") {
-    setCellValue(selected.row, selected.col, Number(key));
+    if (noteMode) {
+      toggleNoteValue(selected.row, selected.col, Number(key));
+    } else {
+      setCellValue(selected.row, selected.col, Number(key));
+    }
     event.preventDefault();
     return;
   }
 
   if (key === "Backspace" || key === "Delete" || key === "0") {
-    setCellValue(selected.row, selected.col, 0);
+    if (noteMode) {
+      clearNotes(selected.row, selected.col);
+    } else {
+      clearCell(selected.row, selected.col);
+    }
     event.preventDefault();
     return;
   }
@@ -191,6 +293,9 @@ function startNewGame() {
     puzzle = generated.puzzle;
     solution = generated.solution;
     current = copyGrid(puzzle);
+    notes = createEmptyNotes();
+    history = [];
+    noteMode = false;
     startTime = Date.now();
     elapsedMs = 0;
     selectFirstEmpty();
@@ -199,6 +304,27 @@ function startNewGame() {
     boardEl.classList.remove("loading");
     showToast(t("toast_new_game"));
   }, 30);
+}
+
+function startManualEntry(grid) {
+  showingSolution = false;
+  showSolutionBtn.textContent = t("show_solution");
+  puzzle = createEmptyGrid();
+  solution = [];
+  const hasGrid = Array.isArray(grid);
+  current = hasGrid ? copyGrid(grid) : createEmptyGrid();
+  notes = createEmptyNotes();
+  history = [];
+  noteMode = false;
+  difficulty = "manual";
+  startTime = Date.now();
+  elapsedMs = 0;
+  selectFirstEmpty();
+  updateUI();
+  saveGame();
+  if (!hasGrid) {
+    showToast(t("toast_manual_ready"));
+  }
 }
 
 function restoreGame() {
@@ -216,9 +342,11 @@ function restoreGame() {
     puzzle = saved.puzzle;
     solution = saved.solution;
     current = saved.current;
+    notes = restoreNotes(saved.notes);
     difficulty = saved.difficulty || "easy";
     startTime = Date.now() - (saved.elapsedMs || 0);
     elapsedMs = saved.elapsedMs || 0;
+    history = [];
     selectFirstEmpty();
     updateUI();
   } catch (error) {
@@ -232,6 +360,7 @@ function saveGame() {
     puzzle,
     solution,
     current,
+    notes,
     difficulty,
     elapsedMs: Date.now() - startTime,
   };
@@ -258,10 +387,24 @@ function selectFirstEmpty() {
 function setCellValue(row, col, value) {
   if (showingSolution) return;
   if (puzzle[row][col] !== 0) return;
+  if (current[row][col] === value) return;
+  pushHistory();
   current[row][col] = value;
+  notes[row][col] = 0;
   updateUI();
   saveGame();
   checkSolved();
+}
+
+function clearCell(row, col) {
+  if (showingSolution) return;
+  if (puzzle[row][col] !== 0) return;
+  if (current[row][col] === 0 && notes[row][col] === 0) return;
+  pushHistory();
+  current[row][col] = 0;
+  notes[row][col] = 0;
+  updateUI();
+  saveGame();
 }
 
 function toggleSolution() {
@@ -271,9 +414,341 @@ function toggleSolution() {
   updateUI();
 }
 
+function toggleNotesMode() {
+  noteMode = !noteMode;
+  updateNoteModeUI();
+}
+
+function updateNoteModeUI() {
+  if (!toggleNotesBtn) return;
+  toggleNotesBtn.classList.toggle("active", noteMode);
+  toggleNotesBtn.setAttribute("aria-pressed", noteMode ? "true" : "false");
+  if (undoBtn) {
+    undoBtn.disabled = history.length === 0;
+  }
+}
+
+function toggleNoteValue(row, col, value) {
+  if (showingSolution) return;
+  if (puzzle[row][col] !== 0) return;
+  if (current[row][col] !== 0) return;
+  pushHistory();
+  const bit = 1 << (value - 1);
+  notes[row][col] ^= bit;
+  updateUI();
+  saveGame();
+}
+
+function clearNotes(row, col) {
+  if (showingSolution) return;
+  if (puzzle[row][col] !== 0) return;
+  if (notes[row][col] === 0) return;
+  pushHistory();
+  notes[row][col] = 0;
+  updateUI();
+  saveGame();
+}
+
+function pushHistory() {
+  history.push({ current: copyGrid(current), notes: copyNotes(notes) });
+  if (history.length > 200) history.shift();
+}
+
+function undoLastAction() {
+  const entry = history.pop();
+  if (!entry) return;
+  current = copyGrid(entry.current);
+  notes = copyNotes(entry.notes);
+  updateUI();
+  saveGame();
+}
+
+function updateNumpadAvailability() {
+  const buttons = numpadEl.querySelectorAll("button");
+  const value = current[selected.row]?.[selected.col] ?? 0;
+  if (puzzle[selected.row]?.[selected.col] !== 0 || showingSolution) {
+    buttons.forEach((btn) => {
+      btn.disabled = true;
+      btn.classList.remove("is-hidden");
+    });
+    return;
+  }
+  const boxNumbers = new Set();
+  const boxRow = Math.floor(selected.row / 3) * 3;
+  const boxCol = Math.floor(selected.col / 3) * 3;
+  for (let r = boxRow; r < boxRow + 3; r += 1) {
+    for (let c = boxCol; c < boxCol + 3; c += 1) {
+      const cellValue = current[r][c];
+      if (cellValue > 0) boxNumbers.add(cellValue);
+    }
+  }
+  if (value > 0) boxNumbers.delete(value);
+  buttons.forEach((btn) => {
+    const num = Number(btn.dataset.value);
+    const hidden = boxNumbers.has(num);
+    btn.disabled = hidden;
+    btn.classList.toggle("is-hidden", hidden);
+  });
+}
+
+function renderNotes(mask) {
+  const items = [];
+  for (let i = 1; i <= 9; i += 1) {
+    const bit = 1 << (i - 1);
+    items.push(`<span>${mask & bit ? i : ""}</span>`);
+  }
+  return `<div class="notes-grid">${items.join("")}</div>`;
+}
+
+function handlePhotoInput() {
+  const file = photoInput?.files?.[0];
+  if (!file) return;
+  photoInput.value = "";
+  sendImageToServer(file);
+}
+
+async function openCamera() {
+  if (!navigator.mediaDevices?.getUserMedia) {
+    showToast(t("toast_camera_unsupported"));
+    return;
+  }
+  try {
+    cameraStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: "environment" } },
+      audio: false,
+    });
+    cameraVideo.srcObject = cameraStream;
+    cameraEl.hidden = false;
+  } catch (error) {
+    showToast(t("toast_camera_denied"));
+  }
+}
+
+function closeCamera() {
+  if (cameraStream) {
+    cameraStream.getTracks().forEach((track) => track.stop());
+  }
+  cameraStream = null;
+  if (cameraVideo) cameraVideo.srcObject = null;
+  if (cameraEl) cameraEl.hidden = true;
+}
+
+function captureFromCamera() {
+  if (!cameraStream || !cameraVideo) return;
+  if (!cameraVideo.videoWidth) {
+    showToast(t("toast_camera_denied"));
+    return;
+  }
+  const size = Math.min(cameraVideo.videoWidth, cameraVideo.videoHeight);
+  const sx = (cameraVideo.videoWidth - size) / 2;
+  const sy = (cameraVideo.videoHeight - size) / 2;
+  cameraCanvas.width = size;
+  cameraCanvas.height = size;
+  const ctx = cameraCanvas.getContext("2d");
+  if (!ctx) return;
+  ctx.drawImage(cameraVideo, sx, sy, size, size, 0, 0, size, size);
+  cameraCanvas.toBlob(
+    (blob) => {
+      if (!blob) return;
+      const file = new File([blob], "capture.jpg", { type: "image/jpeg" });
+      sendImageToServer(file);
+    },
+    "image/jpeg",
+    0.9
+  );
+  closeCamera();
+}
+
+async function sendImageToServer(file) {
+  boardEl.classList.add("loading");
+  showToast(t("toast_scan_start"));
+  try {
+    const formData = new FormData();
+    formData.append("image", file);
+    const response = await fetch("/api/scan", { method: "POST", body: formData });
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => "");
+      throw new Error(errorText || "Scan failed");
+    }
+    const data = await response.json();
+    if (!data?.puzzle || !data?.solution) {
+      throw new Error("Invalid response");
+    }
+    applyScannedGrid(data.puzzle, data.solution);
+    showToast(t("toast_scan_done"));
+  } catch (error) {
+    showToast(t("toast_scan_error"));
+    console.error(error);
+  } finally {
+    boardEl.classList.remove("loading");
+  }
+}
+
+function handleManualImport() {
+  const text = manualInput?.value ?? "";
+  try {
+    const grid = parseManualText(text);
+    startManualEntry(grid);
+    showToast(t("toast_manual_imported"));
+  } catch (error) {
+    showToast(t("toast_manual_invalid"));
+  }
+}
+
+async function handleManualExport() {
+  const text = formatGrid(current);
+  if (manualInput) manualInput.value = text;
+  try {
+    await navigator.clipboard.writeText(text);
+    showToast(t("toast_manual_copied"));
+  } catch {
+    if (manualInput) {
+      manualInput.focus();
+      manualInput.select();
+    }
+    showToast(t("toast_manual_exported"));
+  }
+}
+
+function solveManualGrid() {
+  if (!hasAnyDigits(current)) {
+    showToast(t("toast_manual_empty"));
+    return;
+  }
+  if (findConflicts(current).size > 0) {
+    showToast(t("toast_solve_error"));
+    return;
+  }
+  const attempt = copyGrid(current);
+  if (!solveGrid(attempt)) {
+    showToast(t("toast_solve_error"));
+    return;
+  }
+  applyManualSolution(attempt);
+  showToast(t("toast_manual_solved"));
+}
+
+function applyScannedGrid(puzzleGrid, solutionGrid) {
+  const parsedPuzzle = parsePuzzleGrid(puzzleGrid);
+  const parsedSolution = parseSolvedGrid(solutionGrid);
+  puzzle = createEmptyGrid();
+  solution = copyGrid(parsedSolution);
+  current = copyGrid(parsedPuzzle);
+  notes = createEmptyNotes();
+  history = [];
+  noteMode = false;
+  showingSolution = false;
+  showSolutionBtn.textContent = t("show_solution");
+  difficulty = "manual";
+  startTime = Date.now();
+  elapsedMs = 0;
+  selectFirstEmpty();
+  updateUI();
+  saveGame();
+}
+
+function applyManualSolution(solutionGrid) {
+  const solved = parseSolvedGrid(solutionGrid);
+  const manualPuzzle = sanitizeGrid(current);
+  puzzle = copyGrid(manualPuzzle);
+  solution = copyGrid(solved);
+  current = copyGrid(manualPuzzle);
+  notes = createEmptyNotes();
+  history = [];
+  noteMode = false;
+  showingSolution = true;
+  showSolutionBtn.textContent = t("hide_solution");
+  startTime = Date.now();
+  elapsedMs = 0;
+  selectFirstEmpty();
+  updateUI();
+  saveGame();
+}
+
+function sanitizeGrid(grid) {
+  return grid.map((row) =>
+    row.map((value) => {
+      const num = Number(value);
+      if (Number.isInteger(num) && num >= 0 && num <= 9) return num;
+      return 0;
+    })
+  );
+}
+
+function parseManualText(text) {
+  const tokens = String(text).match(/[0-9.]/g) || [];
+  if (tokens.length !== 81) {
+    throw new Error("Invalid manual input");
+  }
+  const grid = createEmptyGrid();
+  tokens.forEach((char, index) => {
+    const value = char === "." ? 0 : Number(char);
+    if (!Number.isInteger(value) || value < 0 || value > 9) {
+      throw new Error("Invalid manual input");
+    }
+    const row = Math.floor(index / 9);
+    const col = index % 9;
+    grid[row][col] = value;
+  });
+  return grid;
+}
+
+function formatGrid(grid) {
+  return grid
+    .map((row) =>
+      row
+        .map((value) => {
+          if (Number.isInteger(value) && value > 0) return String(value);
+          return ".";
+        })
+        .join("")
+    )
+    .join("\n");
+}
+
+function parseSolvedGrid(grid) {
+  if (!Array.isArray(grid) || grid.length !== 9) {
+    throw new Error("Invalid grid");
+  }
+  const parsed = grid.map((row) => {
+    if (!Array.isArray(row) || row.length !== 9) {
+      throw new Error("Invalid grid");
+    }
+    return row.map((value) => {
+      const num = Number(value);
+      if (!Number.isInteger(num) || num < 1 || num > 9) {
+        throw new Error("Invalid value");
+      }
+      return num;
+    });
+  });
+  return parsed;
+}
+
+function parsePuzzleGrid(grid) {
+  if (!Array.isArray(grid) || grid.length !== 9) {
+    throw new Error("Invalid grid");
+  }
+  const parsed = grid.map((row) => {
+    if (!Array.isArray(row) || row.length !== 9) {
+      throw new Error("Invalid grid");
+    }
+    return row.map((value) => {
+      const num = Number(value);
+      if (!Number.isInteger(num) || num < 0 || num > 9) {
+        throw new Error("Invalid value");
+      }
+      return num;
+    });
+  });
+  return parsed;
+}
+
 function updateUI() {
   updateDifficultyButtons();
   updateBoard();
+  updateNumpadAvailability();
+  updateNoteModeUI();
   updateTimer();
 }
 
@@ -296,7 +771,19 @@ function updateBoard() {
     const col = Number(cell.dataset.col);
     const index = row * 9 + col;
     const value = showingSolution ? solution[row][col] : current[row][col];
-    cell.textContent = value === 0 ? "" : String(value);
+    if (value === 0) {
+      const noteMask = notes[row][col];
+      if (noteMask) {
+        cell.innerHTML = renderNotes(noteMask);
+        cell.classList.add("notes");
+      } else {
+        cell.textContent = "";
+        cell.classList.remove("notes");
+      }
+    } else {
+      cell.textContent = String(value);
+      cell.classList.remove("notes");
+    }
     cell.classList.toggle("fixed", puzzle[row][col] !== 0);
     cell.classList.toggle("selected", row === selected.row && col === selected.col);
     cell.classList.toggle("related", isRelatedCell(row, col, selected.row, selected.col));
@@ -334,11 +821,14 @@ function updateOnlineStatus() {
 
 function checkSolved() {
   if (showingSolution) return;
+  if (!Array.isArray(solution) || solution.length !== 9) return;
   const conflicts = findConflicts(current);
   if (conflicts.size > 0) return;
   for (let row = 0; row < 9; row += 1) {
+    const solutionRow = solution[row];
+    if (!Array.isArray(solutionRow) || solutionRow.length !== 9) return;
     for (let col = 0; col < 9; col += 1) {
-      if (current[row][col] !== solution[row][col]) return;
+      if (current[row][col] !== solutionRow[col]) return;
     }
   }
   showToast(t("toast_solved"));
@@ -355,6 +845,26 @@ function showToast(message) {
 
 function copyGrid(grid) {
   return grid.map((row) => row.slice());
+}
+
+function createEmptyNotes() {
+  return Array.from({ length: 9 }, () => Array(9).fill(0));
+}
+
+function copyNotes(noteGrid) {
+  return noteGrid.map((row) => row.slice());
+}
+
+function restoreNotes(saved) {
+  if (!Array.isArray(saved) || saved.length !== 9) {
+    return createEmptyNotes();
+  }
+  return saved.map((row) => {
+    if (!Array.isArray(row) || row.length !== 9) {
+      return Array(9).fill(0);
+    }
+    return row.map((value) => Number(value) || 0);
+  });
 }
 
 function generatePuzzle(level) {
@@ -404,6 +914,10 @@ function generateSolvedGrid() {
   const grid = createEmptyGrid();
   solveGrid(grid);
   return grid;
+}
+
+function hasAnyDigits(grid) {
+  return grid.some((row) => row.some((value) => value !== 0));
 }
 
 function createEmptyGrid() {
@@ -585,6 +1099,7 @@ function applyTranslations() {
   showSolutionBtn.textContent = showingSolution ? t("hide_solution") : t("show_solution");
   updateDifficultyButtons();
   updateOnlineStatus();
+  updateNoteModeUI();
 }
 
 function getDifficultyLabel(level) {

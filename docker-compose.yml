@@ -1,10 +1,18 @@
 version: "3.9"
 
 services:
-  web:
-    image: nginx:1.25-alpine
+  app:
+    build: .
+    environment:
+      - OCR_URL=http://ocr:8000/scan
     ports:
-      - "8080:80"
-    volumes:
-      - ./:/usr/share/nginx/html:ro
+      - "8080:8080"
+    depends_on:
+      - ocr
+    restart: unless-stopped
+
+  ocr:
+    build:
+      context: .
+      dockerfile: ocr/Dockerfile
     restart: unless-stopped

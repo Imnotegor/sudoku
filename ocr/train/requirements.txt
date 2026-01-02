@@ -1,0 +1,6 @@
+torch
+torchvision
+onnx
+pillow
+numpy
+opencv-python-headless

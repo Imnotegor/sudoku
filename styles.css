@@ -130,6 +130,7 @@ h1 {
   padding: 0;
   cursor: pointer;
   transition: background 140ms ease, color 140ms ease;
+  user-select: none;
 }
 
 .cell:focus-visible {
@@ -167,6 +168,13 @@ h1 {
 .cell.conflict {
   background: #fff;
   color: #d60000;
+}
+
+.cell,
+.pill,
+.action,
+.numpad button {
+  touch-action: manipulation;
 }
 
 .panel {
@@ -218,6 +226,30 @@ h1 {
   gap: 10px;
 }
 
+.manual-input {
+  width: 100%;
+  min-height: 180px;
+  resize: vertical;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  padding: 12px;
+  font-family: "DINASTI", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: clamp(14px, 3vw, 18px);
+  line-height: 1.6;
+  background: #fff;
+  color: #000;
+}
+
+.manual-input:focus {
+  outline: none;
+  border-color: #000;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.08);
+}
+
+.manual-actions {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .action {
   border: 1px solid var(--line);
   border-radius: 14px;
@@ -231,6 +263,25 @@ h1 {
 
 .action:hover {
   background: #1a1a1a;
+}
+
+.action:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.action.toggle.active {
+  background: #fff;
+  color: #000;
+}
+
+.action.ghost {
+  background: #fff;
+  color: #000;
+}
+
+.action.ghost:hover {
+  background: #f3f3f3;
 }
 
 .numpad {
@@ -254,6 +305,36 @@ h1 {
   background: #f3f3f3;
 }
 
+.numpad button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.numpad button.is-hidden {
+  visibility: hidden;
+}
+
+.cell.notes {
+  padding: 4px;
+  align-items: stretch;
+  justify-content: stretch;
+}
+
+.notes-grid {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  font-size: 0.55em;
+  color: #2a2a2a;
+}
+
+.notes-grid span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 .hint {
   color: var(--muted);
   font-size: 0.85rem;
@@ -277,6 +358,45 @@ h1 {
 .toast.show {
   opacity: 1;
   transform: translateX(-50%) translateY(-6px);
+}
+
+.camera[hidden] {
+  display: none;
+}
+
+.camera {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 10;
+}
+
+.camera-shell {
+  width: min(92vw, 520px);
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 12px;
+  display: grid;
+  gap: 12px;
+}
+
+#camera-video {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 12px;
+  background: #000;
+  object-fit: cover;
+}
+
+.camera-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
 }
 
 @keyframes board-fade {
@@ -305,18 +425,119 @@ h1 {
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 720px) {
   .wrap {
-    padding: 24px 16px 48px;
+    padding: 20px 14px 36px;
   }
 
-  .panel {
-    padding: 18px;
+  .hero {
+    gap: 12px 16px;
+    margin-bottom: 18px;
+  }
+
+  .eyebrow {
+    font-size: 0.65rem;
+  }
+
+  h1 {
+    font-size: clamp(1.4rem, 6vw, 2rem);
+  }
+
+  .sub {
+    font-size: 0.9rem;
   }
 
   .status {
     width: 100%;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     justify-items: start;
+  }
+
+  .game {
+    gap: 16px;
+  }
+
+  .board {
+    width: min(96vw, 520px);
+  }
+
+  .cell {
+    font-size: clamp(1.1rem, 7vw, 1.9rem);
+  }
+
+  .panel {
+    padding: 16px;
+    gap: 16px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .panel-section h2 {
+    margin-bottom: 8px;
+    font-size: 0.85rem;
+  }
+
+  .numbers-section {
+    order: -1;
+  }
+
+  .actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .scan-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .action {
+    padding: 12px 10px;
+    font-size: 0.95rem;
+  }
+
+  .pill {
+    padding: 10px 8px;
+    font-size: 0.9rem;
+  }
+
+  .numpad {
+    gap: 8px;
+  }
+
+  .numpad button {
+    padding: 16px 0;
+    font-size: 1.35rem;
+    min-height: 52px;
+  }
+
+  .hint {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .wrap {
+    padding: 16px 12px 32px;
+  }
+
+  .panel {
+    padding: 14px;
+  }
+
+  .status {
+    width: 100%;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    justify-items: start;
+  }
+
+  .timer {
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .manual-input {
+    font-size: 16px;
+    min-height: 200px;
+    padding: 14px;
   }
 }

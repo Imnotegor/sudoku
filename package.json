@@ -1,0 +1,10 @@
+{
+  "name": "sudoku",
+  "private": true,
+  "devDependencies": {
+    "@playwright/test": "^1.51.0"
+  },
+  "scripts": {
+    "test:e2e": "playwright test"
+  }
+}
