@@ -1,31 +1,27 @@
-FROM rust:1.83-bookworm AS builder
-
+FROM node:20-alpine AS frontend
 WORKDIR /app
+COPY package.json package-lock.json build.js tsconfig.json ./
+COPY src/client ./src/client
+COPY static ./static
+RUN npm ci
+RUN node build.js
 
+FROM rust:1.83-slim AS backend
+WORKDIR /app
 COPY Cargo.toml ./
-COPY src ./src
-
+COPY src/server ./src/server
 RUN cargo build --release
 
 FROM debian:bookworm-slim
-
+RUN apt-get update \
+  && apt-get install -y ca-certificates curl \
+  && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
-
-COPY --from=builder /app/target/release/sudoku-server /app/sudoku-server
-COPY index.html ./static/index.html
-COPY styles.css ./static/styles.css
-COPY app.js ./static/app.js
-COPY sw.js ./static/sw.js
-COPY manifest.webmanifest ./static/manifest.webmanifest
-COPY favicon-32.png ./static/favicon-32.png
-COPY icon-192.png ./static/icon-192.png
-COPY icon-512.png ./static/icon-512.png
-COPY apple-touch-icon.png ./static/apple-touch-icon.png
-COPY fonts ./static/fonts
-
+COPY --from=backend /app/target/release/sudoku /app/sudoku
+COPY --from=frontend /app/static /app/static
 ENV STATIC_DIR=/app/static
-ENV OCR_URL=http://ocr:8000/scan
-
+ENV BIND_ADDR=0.0.0.0:8080
 EXPOSE 8080
-
-CMD ["/app/sudoku-server"]
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:8080/api/health || exit 1
+CMD ["/app/sudoku"]

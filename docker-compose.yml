@@ -1,18 +1,22 @@
 version: "3.9"
 
 services:
-  app:
-    build: .
-    environment:
-      - OCR_URL=http://ocr:8000/scan
-    ports:
-      - "8080:8080"
-    depends_on:
-      - ocr
-    restart: unless-stopped
-
   ocr:
     build:
       context: .
       dockerfile: ocr/Dockerfile
-    restart: unless-stopped
+    ports:
+      - "8000:8000"
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      OCR_URL: http://ocr:8000/scan
+      STATIC_DIR: /app/static
+      BIND_ADDR: 0.0.0.0:8080
+    ports:
+      - "8080:8080"
+    depends_on:
+      - ocr

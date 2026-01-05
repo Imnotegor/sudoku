@@ -1,15 +1,16 @@
-const CACHE_NAME = "sudoku-offline-v10";
+const CACHE_NAME = "sudoku-offline-v11";
 const ASSETS = [
-  "./",
-  "./index.html",
-  "./styles.css",
-  "./app.js",
-  "./fonts/DINASTI-Regular.otf",
-  "./manifest.webmanifest",
-  "./icon-192.png",
-  "./icon-512.png",
-  "./apple-touch-icon.png",
-  "./favicon-32.png",
+  "/",
+  "/index.html",
+  "/styles.css",
+  "/dist/app.js",
+  "/dist/worker.js",
+  "/fonts/DINASTI-Regular.otf",
+  "/manifest.webmanifest",
+  "/icon-192.png",
+  "/icon-512.png",
+  "/apple-touch-icon.png",
+  "/favicon-32.png",
 ];
 
 self.addEventListener("install", (event) => {

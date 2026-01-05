@@ -1,10 +1,19 @@
 {
   "name": "sudoku",
   "private": true,
-  "devDependencies": {
-    "@playwright/test": "^1.51.0"
-  },
+  "type": "module",
   "scripts": {
-    "test:e2e": "playwright test"
+    "build": "node build.js",
+    "watch": "node build.js --watch",
+    "test:e2e": "node build.js && playwright test",
+    "test:unit": "vitest run",
+    "test:unit:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.51.0",
+    "esbuild": "^0.24.0",
+    "typescript": "^5.7.0",
+    "vitest": "^1.6.0"
   }
 }

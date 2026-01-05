@@ -1,0 +1,16 @@
+[project]
+name = "sudoku-ocr"
+version = "0.1.0"
+description = "Sudoku OCR service"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.109.0",
+  "uvicorn>=0.27.0",
+  "python-multipart>=0.0.6",
+  "opencv-python-headless>=4.9.0",
+  "pytesseract>=0.3.10",
+  "numpy>=1.26.0",
+  "onnxruntime>=1.17.0",
+  "pydantic>=2.6.0",
+  "pydantic-settings>=2.2.0",
+]

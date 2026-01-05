@@ -4,14 +4,56 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#ffffff" />
-    <title>Судоку офлайн</title>
-    <link rel="manifest" href="./manifest.webmanifest" />
-    <link rel="stylesheet" href="./styles.css" />
-    <link rel="icon" href="./favicon-32.png" type="image/png" />
-    <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+    <title data-i18n="title">Судоку офлайн</title>
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="icon" href="/favicon-32.png" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   </head>
   <body>
     <main class="wrap">
+      <div class="mobile-top-bar">
+        <button
+          class="icon-btn"
+          id="mobile-menu"
+          aria-label="Меню"
+          data-i18n="menu"
+          data-i18n-attr="aria-label"
+        >
+          ☰
+        </button>
+        <div class="mobile-timer" id="mobile-timer">00:00</div>
+        <div class="mobile-actions">
+          <button
+            class="icon-btn"
+            id="mobile-undo"
+            aria-label="Отменить"
+            data-i18n="undo"
+            data-i18n-attr="aria-label"
+          >
+            ↶
+          </button>
+          <button
+            class="icon-btn toggle"
+            id="mobile-notes"
+            aria-label="Заметки"
+            aria-pressed="false"
+            data-i18n="notes"
+            data-i18n-attr="aria-label"
+          >
+            ✎
+          </button>
+          <button
+            class="icon-btn"
+            id="mobile-settings"
+            aria-label="Настройки"
+            data-i18n="settings"
+            data-i18n-attr="aria-label"
+          >
+            ⚙
+          </button>
+        </div>
+      </div>
       <header class="hero">
         <div>
           <p class="eyebrow" data-i18n="eyebrow">Судоку</p>
@@ -26,7 +68,65 @@
       </header>
 
       <section class="game">
-        <div class="board" id="board" role="grid" aria-label="Поле судоку"></div>
+        <div
+          class="board"
+          id="board"
+          role="grid"
+          aria-label="Поле судоку"
+          data-i18n="board_label"
+          data-i18n-attr="aria-label"
+        ></div>
+
+        <div
+          class="mobile-quick-actions"
+          aria-label="Действия"
+          data-i18n="actions_heading"
+          data-i18n-attr="aria-label"
+        >
+          <button class="icon-btn" data-action="undo" aria-label="Отменить" data-i18n="undo" data-i18n-attr="aria-label">
+            ↶
+          </button>
+          <button
+            class="icon-btn"
+            data-action="clear"
+            aria-label="Очистить"
+            data-i18n="clear_cell"
+            data-i18n-attr="aria-label"
+          >
+            ✕
+          </button>
+          <button
+            class="icon-btn toggle"
+            data-action="notes"
+            aria-label="Заметки"
+            aria-pressed="false"
+            data-i18n="notes"
+            data-i18n-attr="aria-label"
+          >
+            ✎
+          </button>
+          <button
+            class="icon-btn"
+            data-action="hint"
+            aria-label="Подсказка"
+            data-i18n="hint_action"
+            data-i18n-attr="aria-label"
+          >
+            💡
+          </button>
+          <button
+            class="icon-btn toggle"
+            data-action="solution"
+            aria-label="Показать решение"
+            aria-pressed="false"
+            data-i18n="show_solution"
+            data-i18n-attr="aria-label"
+          >
+            👁
+          </button>
+        </div>
+
+        <div class="mobile-numpad-host" id="mobile-numpad-host"></div>
 
         <aside class="panel">
           <div class="panel-section">
@@ -86,6 +186,31 @@
       </section>
     </main>
 
+    <div class="mobile-menu-overlay" id="mobile-menu-overlay" hidden>
+      <div
+        class="mobile-menu-content"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Меню"
+        data-i18n="menu"
+        data-i18n-attr="aria-label"
+      >
+        <div class="mobile-menu-header">
+          <h2 data-i18n="menu">Меню</h2>
+          <button
+            class="icon-btn"
+            id="mobile-menu-close"
+            aria-label="Закрыть"
+            data-i18n="camera_close"
+            data-i18n-attr="aria-label"
+          >
+            ✕
+          </button>
+        </div>
+        <div class="mobile-menu-body" id="mobile-menu-body"></div>
+      </div>
+    </div>
+
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <div class="camera" id="camera" hidden>
       <div class="camera-shell">
@@ -98,6 +223,6 @@
     </div>
     <canvas id="camera-canvas" hidden></canvas>
 
-    <script src="./app.js"></script>
+    <script src="/dist/app.js"></script>
   </body>
 </html>
