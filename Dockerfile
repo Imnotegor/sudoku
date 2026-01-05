@@ -9,7 +9,7 @@ RUN node build.js
 FROM rust:1.83-slim AS backend
 WORKDIR /app
 RUN apt-get update \
-  && apt-get install -y --no-install-recommends pkg-config libssl-dev \
+  && apt-get install -y --no-install-recommends pkg-config libssl-dev curl \
   && rm -rf /var/lib/apt/lists/*
 COPY Cargo.toml ./
 COPY src/server ./src/server
