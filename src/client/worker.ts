@@ -13,11 +13,11 @@ type PuzzleWorkerResponse = {
   solution: Grid;
 };
 
-const workerScope = self as DedicatedWorkerGlobalScope;
+declare const self: Worker;
 
-workerScope.addEventListener("message", (event: MessageEvent<PuzzleWorkerMessage>) => {
+self.addEventListener("message", (event: MessageEvent<PuzzleWorkerMessage>) => {
   const { id, difficulty } = event.data;
   const { puzzle, solution } = generatePuzzle(difficulty);
   const response: PuzzleWorkerResponse = { id, difficulty, puzzle, solution };
-  workerScope.postMessage(response);
+  self.postMessage(response);
 });

@@ -1,20 +1,12 @@
 import type { Grid } from "../types";
 import { GRID_SIZE } from "../constants";
 import { isSafe } from "./validation";
+import { shuffle } from "./utils";
 
 interface CellCandidate {
   row: number;
   col: number;
   candidates: number[];
-}
-
-/** Shuffles an array in place using Fisher-Yates algorithm */
-function shuffle<T>(array: T[]): T[] {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-  return array;
 }
 
 /** Finds the best empty cell using MRV (Minimum Remaining Values) heuristic */

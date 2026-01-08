@@ -2,15 +2,7 @@ import type { Difficulty, Grid } from "../types";
 import { DIFFICULTY_BLANKS, GRID_SIZE } from "../constants";
 import { createEmptyGrid, copyGrid } from "./grid";
 import { solveGrid, countSolutions } from "./solver";
-
-/** Shuffles an array in place using Fisher-Yates algorithm */
-function shuffle<T>(array: T[]): T[] {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-  return array;
-}
+import { shuffle } from "./utils";
 
 /** Generates a fully solved Sudoku grid */
 function generateSolvedGrid(): Grid {

@@ -15,9 +15,9 @@
   --cell: #fff;
   --line: #000;
   --grid: #444;
-  --related: #f5f5f5;
-  --selected: #e6e6e6;
-  --same: #f0f0f0;
+  --related: #e3f2fd;
+  --selected: #bbdefb;
+  --same: #fff9c4;
   --radius: 12px;
 }
 
@@ -167,6 +167,11 @@ h1 {
 
 .cell.conflict {
   background: #fff;
+  color: #d60000;
+}
+
+.cell.incorrect {
+  background: #ffe6e6;
   color: #d60000;
 }
 

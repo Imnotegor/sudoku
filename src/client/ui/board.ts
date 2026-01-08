@@ -1,5 +1,5 @@
 import { GRID_SIZE } from "../constants";
-import { gameState, findConflicts, isRelatedCell } from "../game";
+import { gameState, findConflicts, findIncorrect, isRelatedCell } from "../game";
 
 let boardElement: HTMLElement | null = null;
 let cells: HTMLButtonElement[] = [];
@@ -12,6 +12,7 @@ type CellRenderState = {
   selected: boolean;
   related: boolean;
   conflict: boolean;
+  incorrect: boolean;
   same: boolean;
 };
 
@@ -52,6 +53,7 @@ function buildBoard(): void {
         selected: false,
         related: false,
         conflict: false,
+        incorrect: false,
         same: false,
       });
     }
@@ -74,6 +76,7 @@ export function updateBoard(): void {
 
   const displayGrid = gameState.getDisplayGrid();
   const conflicts = findConflicts(displayGrid);
+  const incorrectCells = findIncorrect(gameState.current, gameState.solution, gameState.puzzle);
   const { row: selectedRow, col: selectedCol } = gameState.selected;
   const selectedValue = displayGrid[selectedRow][selectedCol];
   const puzzle = gameState.puzzle;
@@ -89,6 +92,7 @@ export function updateBoard(): void {
     const selected = row === selectedRow && col === selectedCol;
     const related = isRelatedCell(row, col, selectedRow, selectedCol);
     const conflict = conflicts.has(index);
+    const incorrect = incorrectCells.has(index);
     const same = value !== 0 && value === selectedValue && !selected;
 
     const previous = lastRender[index];
@@ -99,6 +103,7 @@ export function updateBoard(): void {
       selected,
       related,
       conflict,
+      incorrect,
       same,
     };
 
@@ -110,6 +115,7 @@ export function updateBoard(): void {
       previous.selected === next.selected &&
       previous.related === next.related &&
       previous.conflict === next.conflict &&
+      previous.incorrect === next.incorrect &&
       previous.same === next.same
     ) {
       return;
@@ -132,6 +138,7 @@ export function updateBoard(): void {
     cell.classList.toggle("selected", selected);
     cell.classList.toggle("related", related);
     cell.classList.toggle("conflict", conflict);
+    cell.classList.toggle("incorrect", incorrect);
     cell.classList.toggle("same", same);
     cell.setAttribute("aria-selected", selected ? "true" : "false");
 

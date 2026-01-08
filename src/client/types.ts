@@ -1,6 +1,3 @@
-/** Grid dimensions */
-export const GRID_SIZE = 9;
-
 /** A single row of the Sudoku grid (0 = empty, 1-9 = digit) */
 export type GridRow = [number, number, number, number, number, number, number, number, number];
 
@@ -102,33 +99,4 @@ export interface SavedGameState {
 export interface ScanResponse {
   readonly puzzle: number[][];
   readonly solution: number[][];
-}
-
-/** DOM element references */
-export interface DomElements {
-  readonly board: HTMLElement;
-  readonly difficulty: HTMLElement;
-  readonly difficultyLabel: HTMLElement;
-  readonly timer: HTMLElement;
-  readonly onlineStatus: HTMLElement;
-  readonly newGameBtn: HTMLButtonElement;
-  readonly manualEntryBtn: HTMLButtonElement | null;
-  readonly solveManualBtn: HTMLButtonElement | null;
-  readonly manualInput: HTMLTextAreaElement | null;
-  readonly manualImportBtn: HTMLButtonElement | null;
-  readonly manualExportBtn: HTMLButtonElement | null;
-  readonly clearBtn: HTMLButtonElement;
-  readonly undoBtn: HTMLButtonElement | null;
-  readonly toggleNotesBtn: HTMLButtonElement | null;
-  readonly showSolutionBtn: HTMLButtonElement;
-  readonly numpad: HTMLElement;
-  readonly toast: HTMLElement;
-  readonly openCameraBtn: HTMLButtonElement | null;
-  readonly uploadPhotoBtn: HTMLButtonElement | null;
-  readonly photoInput: HTMLInputElement | null;
-  readonly camera: HTMLElement | null;
-  readonly cameraVideo: HTMLVideoElement | null;
-  readonly cameraCaptureBtn: HTMLButtonElement | null;
-  readonly cameraCloseBtn: HTMLButtonElement | null;
-  readonly cameraCanvas: HTMLCanvasElement | null;
 }

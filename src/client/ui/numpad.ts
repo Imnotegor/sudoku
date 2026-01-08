@@ -1,6 +1,7 @@
 import { gameState } from "../game";
 
 let numpadElement: HTMLElement | null = null;
+let buttons: HTMLButtonElement[] = [];
 
 /** Initialize the numpad module with the numpad element */
 export function initNumpad(element: HTMLElement): void {
@@ -13,20 +14,21 @@ function buildNumpad(): void {
   if (!numpadElement) return;
 
   numpadElement.innerHTML = "";
+  buttons = [];
+
   for (let i = 1; i <= 9; i++) {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.textContent = String(i);
     btn.dataset.value = String(i);
     numpadElement.appendChild(btn);
+    buttons.push(btn);
   }
 }
 
 /** Update numpad button availability based on current selection */
 export function updateNumpadAvailability(): void {
-  if (!numpadElement) return;
-
-  const buttons = numpadElement.querySelectorAll<HTMLButtonElement>("button");
+  if (!numpadElement || buttons.length === 0) return;
   const { row, col } = gameState.selected;
   const current = gameState.current;
   const puzzle = gameState.puzzle;

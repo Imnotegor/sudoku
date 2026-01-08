@@ -20,6 +20,7 @@ import {
   initTimer,
   updateTimer,
   startTimer,
+  stopTimer,
   initNumpad,
   updateNumpadAvailability,
   handleNumpadClick,
@@ -38,26 +39,38 @@ import {
 import { saveGame, loadGame } from "./storage";
 import { ApiError, scanImage } from "./api";
 
+/** Get required element or throw meaningful error */
+function getRequiredElement<T extends HTMLElement>(id: string): T {
+  const element = document.getElementById(id);
+  if (!element) {
+    throw new Error(`Required element #${id} not found in DOM`);
+  }
+  return element as T;
+}
+
 /** DOM element references */
 function getElements() {
   return {
-    board: document.getElementById("board")!,
-    difficulty: document.getElementById("difficulty")!,
-    difficultyLabel: document.getElementById("difficulty-label")!,
-    timer: document.getElementById("timer")!,
-    onlineStatus: document.getElementById("online-status")!,
-    newGameBtn: document.getElementById("new-game") as HTMLButtonElement,
+    // Required elements - app won't work without these
+    board: getRequiredElement("board"),
+    difficulty: getRequiredElement("difficulty"),
+    difficultyLabel: getRequiredElement("difficulty-label"),
+    timer: getRequiredElement("timer"),
+    onlineStatus: getRequiredElement("online-status"),
+    newGameBtn: getRequiredElement<HTMLButtonElement>("new-game"),
+    clearBtn: getRequiredElement<HTMLButtonElement>("clear-cell"),
+    showSolutionBtn: getRequiredElement<HTMLButtonElement>("show-solution"),
+    numpad: getRequiredElement("numpad"),
+    toast: getRequiredElement("toast"),
+
+    // Optional elements - may not exist on all layouts
     manualEntryBtn: document.getElementById("manual-entry") as HTMLButtonElement | null,
     solveManualBtn: document.getElementById("solve-manual") as HTMLButtonElement | null,
     manualInput: document.getElementById("manual-input") as HTMLTextAreaElement | null,
     manualImportBtn: document.getElementById("manual-import") as HTMLButtonElement | null,
     manualExportBtn: document.getElementById("manual-export") as HTMLButtonElement | null,
-    clearBtn: document.getElementById("clear-cell") as HTMLButtonElement,
     undoBtn: document.getElementById("undo-move") as HTMLButtonElement | null,
     toggleNotesBtn: document.getElementById("toggle-notes") as HTMLButtonElement | null,
-    showSolutionBtn: document.getElementById("show-solution") as HTMLButtonElement,
-    numpad: document.getElementById("numpad")!,
-    toast: document.getElementById("toast")!,
     openCameraBtn: document.getElementById("open-camera") as HTMLButtonElement | null,
     uploadPhotoBtn: document.getElementById("upload-photo") as HTMLButtonElement | null,
     photoInput: document.getElementById("photo-input") as HTMLInputElement | null,
@@ -168,6 +181,21 @@ function fallbackGenerate(difficulty: Difficulty, requestId: number): void {
 function cancelPendingGeneration(): void {
   generationRequestId += 1;
   pendingDifficulty = null;
+}
+
+/** Cleanup resources before page unload */
+function cleanup(): void {
+  // Save game state
+  saveGame(gameState.getSaveState());
+
+  // Stop timer
+  stopTimer();
+
+  // Terminate worker
+  if (puzzleWorker) {
+    puzzleWorker.terminate();
+    puzzleWorker = null;
+  }
 }
 
 /** Initialize the application */
@@ -319,6 +347,17 @@ function bindEvents(): void {
   // Manual export button
   elements.manualExportBtn?.addEventListener("click", handleManualExport);
 
+  // Manual input - allow only digits and dots
+  elements.manualInput?.addEventListener("input", () => {
+    if (!elements.manualInput) return;
+    const filtered = elements.manualInput.value.replace(/[^0-9.\n]/g, "");
+    if (filtered !== elements.manualInput.value) {
+      const pos = Math.max(0, (elements.manualInput.selectionStart ?? 1) - 1);
+      elements.manualInput.value = filtered;
+      elements.manualInput.setSelectionRange(pos, pos);
+    }
+  });
+
   // Clear cell button
   elements.clearBtn.addEventListener("click", () => {
     const { row, col } = gameState.selected;
@@ -392,10 +431,8 @@ function bindEvents(): void {
   // Keyboard events
   document.addEventListener("keydown", handleKeydown);
 
-  // Save game before unload
-  window.addEventListener("beforeunload", () => {
-    saveGame(gameState.getSaveState());
-  });
+  // Cleanup and save game before unload
+  window.addEventListener("beforeunload", cleanup);
 }
 
 function handleQuickAction(action?: string): void {

@@ -87,15 +87,31 @@ export function findConflicts(grid: Grid): Set<number> {
   return conflicts;
 }
 
-/** Checks if two cells are related (same row, column, or 3x3 box) */
+/** Finds all cells with incorrect values compared to the solution. Returns a Set of cell indices (row * 9 + col). */
+export function findIncorrect(current: Grid, solution: Grid | null, puzzle: Grid): Set<number> {
+  const incorrect = new Set<number>();
+
+  if (!solution) return incorrect;
+
+  for (let row = 0; row < GRID_SIZE; row++) {
+    for (let col = 0; col < GRID_SIZE; col++) {
+      const value = current[row][col];
+      // Skip empty cells and fixed (puzzle) cells
+      if (value === 0) continue;
+      if (puzzle[row][col] !== 0) continue;
+
+      // Check if value doesn't match solution
+      if (value !== solution[row][col]) {
+        incorrect.add(row * GRID_SIZE + col);
+      }
+    }
+  }
+
+  return incorrect;
+}
+
+/** Checks if two cells are related (same row or column) */
 export function isRelatedCell(row: number, col: number, focusRow: number, focusCol: number): boolean {
   // Same row or column
-  if (row === focusRow || col === focusCol) return true;
-
-  // Same 3x3 box
-  const sameBox =
-    Math.floor(row / 3) === Math.floor(focusRow / 3) &&
-    Math.floor(col / 3) === Math.floor(focusCol / 3);
-
-  return sameBox;
+  return row === focusRow || col === focusCol;
 }
