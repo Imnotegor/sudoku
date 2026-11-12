@@ -6,14 +6,14 @@ COPY static ./static
 RUN npm ci
 RUN node build.js
 
-FROM rust:1.83-slim AS backend
+FROM rust:1.90-slim-bookworm AS backend
 WORKDIR /app
 RUN apt-get update \
   && apt-get install -y --no-install-recommends pkg-config libssl-dev curl \
   && rm -rf /var/lib/apt/lists/*
-COPY Cargo.toml ./
+COPY Cargo.toml Cargo.lock ./
 COPY src/server ./src/server
-RUN cargo build --release
+RUN cargo build --release --locked
 
 FROM debian:bookworm-slim
 RUN apt-get update \
