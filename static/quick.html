@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#ffffff" />
+    <title data-i18n="title">Судоку офлайн</title>
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="icon" href="/favicon-32.png" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  </head>
+  <body>
+    <main class="wrap">
+      <nav aria-label="Режимы игры" style="padding:12px 16px"><a href="/" style="color:inherit">← К выбору режима</a></nav>
+      <div class="mobile-top-bar">
+        <button
+          class="icon-btn"
+          id="mobile-menu"
+          aria-label="Меню"
+          data-i18n="menu"
+          data-i18n-attr="aria-label"
+        >
+          ☰
+        </button>
+        <div class="mobile-timer" id="mobile-timer">00:00</div>
+        <div class="mobile-actions">
+          <button
+            class="icon-btn"
+            id="mobile-undo"
+            aria-label="Отменить"
+            data-i18n="undo"
+            data-i18n-attr="aria-label"
+          >
+            ↶
+          </button>
+          <button
+            class="icon-btn toggle"
+            id="mobile-notes"
+            aria-label="Заметки"
+            aria-pressed="false"
+            data-i18n="notes"
+            data-i18n-attr="aria-label"
+          >
+            ✎
+          </button>
+          <button
+            class="icon-btn"
+            id="mobile-settings"
+            aria-label="Настройки"
+            data-i18n="settings"
+            data-i18n-attr="aria-label"
+          >
+            ⚙
+          </button>
+        </div>
+      </div>
+      <header class="hero">
+        <div>
+          <p class="eyebrow" data-i18n="eyebrow">Судоку</p>
+          <h1 data-i18n="hero_title">Играйте без интернета на любом устройстве</h1>
+          <p class="sub" data-i18n="hero_sub">Автосохранение прогресса, адаптивная сетка и уровни сложности.</p>
+        </div>
+        <div class="status">
+          <div class="badge" id="difficulty-label">Сложность: —</div>
+          <div class="timer" id="timer">00:00</div>
+          <div class="badge" id="online-status">Онлайн</div>
+        </div>
+      </header>
+
+      <section class="game">
+        <div
+          class="board"
+          id="board"
+          role="grid"
+          aria-label="Поле судоку"
+          data-i18n="board_label"
+          data-i18n-attr="aria-label"
+        ></div>
+
+        <div
+          class="mobile-quick-actions"
+          aria-label="Действия"
+          data-i18n="actions_heading"
+          data-i18n-attr="aria-label"
+        >
+          <button class="icon-btn" data-action="undo" aria-label="Отменить" data-i18n="undo" data-i18n-attr="aria-label">
+            ↶
+          </button>
+          <button
+            class="icon-btn"
+            data-action="clear"
+            aria-label="Очистить"
+            data-i18n="clear_cell"
+            data-i18n-attr="aria-label"
+          >
+            ✕
+          </button>
+          <button
+            class="icon-btn toggle"
+            data-action="notes"
+            aria-label="Заметки"
+            aria-pressed="false"
+            data-i18n="notes"
+            data-i18n-attr="aria-label"
+          >
+            ✎
+          </button>
+          <button
+            class="icon-btn"
+            data-action="hint"
+            aria-label="Подсказка"
+            data-i18n="hint_action"
+            data-i18n-attr="aria-label"
+          >
+            💡
+          </button>
+          <button
+            class="icon-btn toggle"
+            data-action="solution"
+            aria-label="Показать решение"
+            aria-pressed="false"
+            data-i18n="show_solution"
+            data-i18n-attr="aria-label"
+          >
+            👁
+          </button>
+        </div>
+
+        <div class="mobile-numpad-host" id="mobile-numpad-host"></div>
+
+        <aside class="panel">
+          <div class="panel-section">
+            <h2 data-i18n="difficulty_heading">Сложность</h2>
+            <div class="difficulty" id="difficulty">
+              <button class="pill" data-level="easy" data-i18n="difficulty_easy">Легко</button>
+              <button class="pill" data-level="medium" data-i18n="difficulty_medium">Нормально</button>
+              <button class="pill" data-level="hard" data-i18n="difficulty_hard">Сложно</button>
+              <button class="pill" data-level="expert" data-i18n="difficulty_expert">Эксперт</button>
+            </div>
+          </div>
+
+          <div class="panel-section">
+            <h2 data-i18n="actions_heading">Действия</h2>
+            <div class="actions">
+              <button class="action" id="new-game" data-i18n="new_game">Новая игра</button>
+              <button class="action" id="manual-entry" data-i18n="manual_entry">Ручной ввод</button>
+              <button class="action" id="solve-manual" data-i18n="solve_manual">Решить ввод</button>
+              <button class="action" id="clear-cell" data-i18n="clear_cell">Очистить</button>
+              <button class="action" id="undo-move" data-i18n="undo">Отменить</button>
+              <button class="action toggle" id="toggle-notes" data-i18n="notes">Заметки</button>
+              <button class="action" id="show-solution" data-i18n="show_solution">Показать решение</button>
+            </div>
+          </div>
+
+          <div class="panel-section manual-section">
+            <h2 data-i18n="manual_heading">Ручной ввод</h2>
+            <textarea
+              inputmode="text"
+              class="manual-input"
+              id="manual-input"
+              data-i18n="manual_placeholder"
+              data-i18n-attr="placeholder"
+              rows="9"
+            ></textarea>
+            <div class="actions manual-actions">
+              <button class="action ghost" id="manual-import" data-i18n="manual_import">Импорт</button>
+              <button class="action ghost" id="manual-export" data-i18n="manual_export">Экспорт</button>
+            </div>
+          </div>
+
+          <div class="panel-section scan-section">
+            <h2 data-i18n="scan_heading">Сканирование</h2>
+            <div class="actions scan-actions">
+              <button class="action" id="open-camera" data-i18n="open_camera">Камера</button>
+              <button class="action" id="upload-photo" data-i18n="upload_photo">Загрузить фото</button>
+            </div>
+            <input type="file" id="photo-input" accept="image/*" capture="environment" hidden />
+          </div>
+
+          <div class="panel-section numbers-section">
+            <h2 data-i18n="numbers_heading">Числа</h2>
+            <div class="numpad" id="numpad"></div>
+            <p class="hint" data-i18n="hint">Можно вводить цифры 1–9 с клавиатуры. Стрелки перемещают выделение.</p>
+          </div>
+        </aside>
+      </section>
+    </main>
+
+    <div class="mobile-menu-overlay" id="mobile-menu-overlay" hidden>
+      <div
+        class="mobile-menu-content"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Меню"
+        data-i18n="menu"
+        data-i18n-attr="aria-label"
+      >
+        <div class="mobile-menu-header">
+          <h2 data-i18n="menu">Меню</h2>
+          <button
+            class="icon-btn"
+            id="mobile-menu-close"
+            aria-label="Закрыть"
+            data-i18n="camera_close"
+            data-i18n-attr="aria-label"
+          >
+            ✕
+          </button>
+        </div>
+        <div class="mobile-menu-body" id="mobile-menu-body"></div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <div class="camera" id="camera" hidden>
+      <div class="camera-shell">
+        <video id="camera-video" autoplay playsinline></video>
+        <div class="camera-actions">
+          <button class="action ghost" id="camera-close" data-i18n="camera_close">Закрыть</button>
+          <button class="action" id="camera-capture" data-i18n="camera_capture">Снять</button>
+        </div>
+      </div>
+    </div>
+    <canvas id="camera-canvas" hidden></canvas>
+
+    <script src="/dist/app.js"></script>
+  </body>
+</html>

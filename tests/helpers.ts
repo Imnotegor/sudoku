@@ -35,7 +35,7 @@ export async function loadApp(
     scanErrorText?: string;
   } = {}
 ): Promise<void> {
-  const indexPath = path.join(process.cwd(), "static", "index.html");
+  const indexPath = path.join(process.cwd(), "static", "quick.html");
   const appPath = path.join(process.cwd(), "static", "dist", "app.js");
 
   const rawHtml = readFileSync(indexPath, "utf8");
@@ -89,5 +89,5 @@ export async function loadApp(
 
   await page.addScriptTag({ path: appPath });
   await page.waitForFunction(() => document.documentElement.dataset.appReady === "true");
-  await page.waitForSelector("#board .cell");
+  await page.waitForSelector("#board:not(.loading) .cell.fixed");
 }

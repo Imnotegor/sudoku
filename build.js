@@ -10,6 +10,7 @@ mkdirSync("static/dist", { recursive: true });
 const buildOptions = {
   entryPoints: {
     app: "src/client/main.ts",
+    city: "src/client/city/main.ts",
     worker: "src/client/worker.ts",
   },
   bundle: true,

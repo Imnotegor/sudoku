@@ -19,6 +19,7 @@ use utoipa_swagger_ui::SwaggerUi;
 
 mod api;
 mod config;
+mod city;
 mod error;
 mod grid;
 mod ocr;
@@ -96,6 +97,11 @@ async fn main() {
         .layer(CorsLayer::permissive())
         .layer(DefaultBodyLimit::max(MAX_UPLOAD_BYTES))
         .nest_service("/", ServeDir::new(static_dir));
+
+    let app = match env::var("DATABASE_URL") {
+        Ok(url) => app.nest("/api/city", city::router(&url).await.expect("initialize city database")),
+        Err(_) => app,
+    };
 
     // Bind and serve
     let addr = env::var("BIND_ADDR").unwrap_or_else(|_| "0.0.0.0:8080".to_string());

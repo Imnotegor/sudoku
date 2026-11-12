@@ -13,10 +13,34 @@ services:
       context: .
       dockerfile: Dockerfile
     environment:
+      DATABASE_URL: postgresql://sudoku:${CITY_DB_PASSWORD:-sudoku-local}@db:5432/sudoku
+      CITY_ADMIN_KEY: ${CITY_ADMIN_KEY:-}
       OCR_URL: http://ocr:8000/scan
       STATIC_DIR: /app/static
       BIND_ADDR: 0.0.0.0:8080
     ports:
       - "8080:8080"
     depends_on:
-      - ocr
+      db:
+        condition: service_healthy
+      ocr:
+        condition: service_started
+
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    command: ["postgres", "-c", "shared_buffers=32MB", "-c", "max_connections=24"]
+    environment:
+      POSTGRES_DB: sudoku
+      POSTGRES_USER: sudoku
+      POSTGRES_PASSWORD: ${CITY_DB_PASSWORD:-sudoku-local}
+    volumes:
+      - city-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sudoku -d sudoku"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+
+volumes:
+  city-data:
