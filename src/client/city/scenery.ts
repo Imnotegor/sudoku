@@ -104,77 +104,6 @@ function house(c: Pen, x: number, y: number, size: number, roof: string) {
   });
 }
 
-function landmark(c: Pen, slot: number) {
-  oval(c, 5, 2, 33, 7, "#4d554333");
-  switch (slot) {
-    case 1: // A station hall with a clock tower and striped platforms.
-      shape(c, "M-39 -1l53 -12 28 9 -54 13Z", "#c8bbaa");
-      shape(c, "M-30 -16l38 -9v19l-38 9Z", "#e7c99e");
-      shape(c, "M8 -25l22 9V0L8 -6Z", "#bd946e");
-      shape(c, "M-34 -16l9 -13 36 -9 -6 14Z", "#7b9991");
-      shape(c, "M5 -24l6 -14 22 21 -3 2Z", "#597a77");
-      for (let x = -25; x < 2; x += 7)
-        shape(c, `M${x} ${-10 - (x + 25) * 0.23}v7`, "", "#576a65", 2.4);
-      shape(c, "M-11 -3v-31l10 -3v31Z", "#f5dfae");
-      shape(c, "M-1 -37l8 5v28l-8 -2Z", "#b4936b");
-      shape(c, "M-14 -34l10 -15 12 16 -9 -3Z", "#506d65");
-      oval(c, -6, -25, 3.4, 4, "#ffefc8");
-      shape(c, "M-6 -28v3l2 1", "", ink, 1.1);
-      break;
-    case 2: // Glasshouse in the botanical garden.
-      tree(c, -25, 0, 1.1, false, 0);
-      tree(c, 26, -3, 1.4, false, 1);
-      shape(c, "M-21 -2v-9q0 -13 18 -17 17 -4 22 9v11Z", "#b5d3ba");
-      shape(
-        c,
-        "M-21 -11l40 -9m-39 13l39 -9M-14 -4v-11q2 -10 10 -12M-5 -6v-14q3 -9 6 -9M5 -9v-12q0 -7 -2 -8M14 -11v-12",
-        "",
-        "#657d69",
-        1.3,
-      );
-      shape(c, "M-23 -2l43 -10v4L-23 3Z", "#e1c89c");
-      tree(c, -31, 4, 0.7, false, 1);
-      break;
-    case 3: // Copper dome and colonnade.
-      shape(c, "M-34 0l36 -9 34 8 -39 11Z", "#d6bea0");
-      shape(c, "M-28 -3v-20l30 -8 29 10v17L1 3Z", "#e7d2af");
-      shape(c, "M1 -31l30 10v17L1 3Z", "#c6a383");
-      shape(c, "M-32 -23l32 -15 34 16 -32 -4Z", "#ae7661");
-      shape(c, "M-15 -26v-7l16 -5 14 6v6l-14 -4Z", "#f2d8a9");
-      shape(c, "M-15 -33q1 -16 16 -21 14 4 14 22l-14 -5Z", "#709a90");
-      shape(c, "M0 -54v-6m0 8q-6 9 -6 16", "", ink, 1.25);
-      for (let i = 0; i < 5; i++)
-        shape(c, `M${-23 + i * 5} ${-18 - i}v13`, "", "#fff1d6", 2.6);
-      shape(c, "M7 -19v10m8 -8v9m7 -6v8", "", "#746d60", 2);
-      break;
-    case 4: // Working docks and a lattice jib crane.
-      shape(c, "M-33 0l46 -13 27 9 -47 14Z", "#caa174");
-      for (let i = 0; i < 5; i++)
-        shape(c, `M${-27 + i * 9} ${1 - i * 2.5}l17 5`, "", "#9c7855", 1);
-      house(c, -12, -4, 0.85, "#a9654f");
-      shape(c, "M5 -5l3 -36 5 -1 4 34ZM7 -9l7 -9 -6 -8 6 -9", "", "#6e6550", 2);
-      shape(c, "M-4 -37l10 -7 36 -15 1 4 -34 20Z", "#d8a654");
-      shape(c, "M9 -43l5 5 6 -9 5 3 7 -8", "", "#836841", 1.1);
-      shape(c, "M37 -53v23q0 4 -4 2", "", ink, 1.25);
-      break;
-    default: // A striped lighthouse with a glazed lantern.
-      shape(c, "M-22 2l7 -9 18 -5 16 8 7 6 -24 7Z", "#b6ad97");
-      shape(c, "M-9 1l4 -47 9 -1 6 45 -8 4Z", "#f6e6c5");
-      shape(
-        c,
-        "M-7 -16l14 -3 1 9 -16 3ZM-5 -36l10 -2 1 8 -12 1Z",
-        "#bb6955",
-        "",
-        0,
-      );
-      shape(c, "M-8 -46l18 -3v4l-18 3Z", "#466662");
-      shape(c, "M-5 -46v-11l9 -2 4 2v10Z", "#efd58a");
-      shape(c, "M-9 -56l10 -10 10 8 -7 -1Z", "#587772");
-      shape(c, "M1 -58v10M0 -66v-4M-1 0v-6", "", ink, 1.4);
-      break;
-  }
-}
-
 const terrain = {
   river: {
     land: "#e9dcb8",
@@ -195,7 +124,7 @@ const terrain = {
     roof: "#9c7763",
   },
 };
-type Node = Point & { id: number; slot: number };
+type Node = Point & { id: number };
 export function createScene(
   kind: Landscape,
   seed: number,
@@ -402,8 +331,6 @@ export function createScene(
       stroke(c, road, "#9b8868", 1.1);
       c.setLineDash([]);
     }
-    for (const n of [...nodes].sort((a, b) => a.y - b.y))
-      at(c, n.x, n.y, 1.15, () => landmark(c, n.slot));
   }
   function boat(c: Pen, x: number, y: number, angle: number, size: number) {
     c.save();

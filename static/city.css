@@ -195,6 +195,7 @@ code,
   color: var(--amber);
 }
 .city-map {
+  container-type: inline-size;
   width: 100%;
   position: relative;
   overflow: hidden;
@@ -208,14 +209,14 @@ code,
   border-radius: 0;
 }
 .city-map atlas-scenery,
-.city-map canvas {
+.city-map atlas-scenery > canvas {
   display: block;
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
 }
-.city-map canvas + canvas {
+.city-map atlas-scenery > canvas + canvas {
   pointer-events: none;
 }
 .atlas .map-pin {
@@ -232,12 +233,13 @@ code,
   --pin-ink: #716a54;
   --pin-paper: #fff6db;
 }
-.atlas .map-pin::before {
-  content: "";
+.map-pin .district-icon {
   position: absolute;
-  width: 100%;
-  height: 20px;
-  bottom: 100%;
+  left: 50%;
+  bottom: calc(100% - 4px);
+  width: clamp(52px, 14cqw, 114px);
+  height: auto;
+  transform: translateX(-50%);
 }
 .map-pin b,
 .map-pin small {

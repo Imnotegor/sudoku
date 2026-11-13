@@ -1,4 +1,5 @@
 import { District, esc } from "./common";
+import { districtIcon } from "./district-icons";
 import { createScene, WIDTH, HEIGHT, landscapes, mapSeed } from "./scenery";
 export const landmarks: District[] = [
   { id: 1, slot: 1, name: "Вокзал", x: 17, y: 55 },
@@ -151,8 +152,8 @@ export function drawMap(
     b.className = "map-pin " + (p.state ?? "");
     b.style.left = d.x + "%";
     b.style.top = d.y + "%";
-    b.title = d.name;
     b.innerHTML = `<b>${esc(d.name)}</b>${p.label ? "<small>" + esc(p.label) + "</small>" : ""}`;
+    b.prepend(districtIcon(d.slot));
     if (b instanceof HTMLButtonElement) {
       b.type = "button";
       b.disabled = !!p.disabled;
