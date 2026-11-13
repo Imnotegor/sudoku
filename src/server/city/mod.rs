@@ -1,6 +1,7 @@
 mod admin;
 mod battle;
 mod map;
+mod match_layout;
 
 use axum::{
     extract::{DefaultBodyLimit, Request, State},
@@ -186,6 +187,18 @@ pub async fn router(url: &str) -> Result<Router, sqlx::Error> {
             .execute(&mut *tx)
             .await?;
         map::seed(&mut tx).await?;
+    }
+    // Existing in-progress and finished matches keep their published map.
+    sqlx::query("ALTER TABLE matches ADD COLUMN IF NOT EXISTS layout jsonb")
+        .execute(&mut *tx)
+        .await?;
+    let lobbies: Vec<(i32, i32)> = sqlx::query_as(
+        "SELECT id,version_id FROM matches WHERE layout IS NULL AND started_at IS NULL FOR UPDATE",
+    )
+    .fetch_all(&mut *tx)
+    .await?;
+    for (room, version) in lobbies {
+        match_layout::save(&mut tx, room, version).await?;
     }
     tx.commit().await?;
     Ok(Router::new()

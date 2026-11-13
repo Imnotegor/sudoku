@@ -111,6 +111,7 @@ pub(super) async fn create(State(db): State<PgPool>, h: HeaderMap, Json(s): Json
     .bind(minutes)
     .fetch_one(&mut *tx)
     .await?;
+    match_layout::save(&mut tx, room, version).await?;
     for (side, name) in [(0, "Синие"), (1, "Янтарные")] {
         let team: i32 = sqlx::query_scalar("INSERT INTO teams(name) VALUES($1) RETURNING id")
             .bind(name)

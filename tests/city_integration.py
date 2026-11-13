@@ -58,6 +58,11 @@ def solve(grid):
     return "".join(map(str, board))
 
 
+def geometry(city):
+    return ({d["id"]: (d["x"], d["y"]) for d in city["districts"]},
+            {tuple(sorted(edge)) for edge in city["links"]})
+
+
 def main():
     admin, a, b, c, d, spectator = [Client() for _ in range(6)]
     for client in [admin, a, b, c, d, spectator]:
@@ -74,6 +79,15 @@ def main():
     assert b.call("/map")["done"] == []
     code = admin.call("/matches", {"spectate": True, "minutes": 25, "version": current["version_id"]})["code"]
     room = "/matches/" + code
+    original = geometry(a.call(room))
+    assert geometry(spectator.call(room)) == original
+    assert admin.call("/matches", {"spectate": True, "minutes": 25,
+                                   "version": current["version_id"]})["code"] == code
+    other_code = spectator.call("/matches", {})["code"]
+    other_positions, other_links = geometry(spectator.call("/matches/" + other_code))
+    assert set(other_positions) == set(original[0])
+    assert other_positions != original[0] and other_links != original[1]
+    assert geometry(a.call("/map")) == geometry(current)
     a.call(room + "/join", {"side": 0})
     b.call(room + "/join", {"side": 0})
     c.call(room + "/join", {"side": 0}, 409)
@@ -83,6 +97,7 @@ def main():
     a.call(room + "/play", district, 409)
     d.call(room + "/join", {"side": 1})
     match = a.call(room)
+    assert geometry(match) == original
     assert match["status"] == "active" and 1495 <= match["ends"] - match["now"] <= 1500
     assert [len(t["players"]) for t in match["teams"]] == [2, 2]
     spectator.call(room + "/join", {"side": 1}, 409)
@@ -116,6 +131,7 @@ def main():
     admin.call("/admin/maps", dict(layout, links=[]), 400)
     admin.call("/admin/maps", layout)
     admin.call("/admin/maps", layout, 409)
+    assert geometry(a.call(room)) == original
     assert a.call(room)["map"] == current["name"]
     assert a.call("/map")["version_id"] != current["version_id"]
     assert a.call("/map?campaign=%d" % current["campaign_id"])["done"] == [start["id"]]
