@@ -1,0 +1,11 @@
+services:
+  app:
+    image: sudoku-web:${BUILD_REVISION:?set BUILD_REVISION}
+    build:
+      labels:
+        org.opencontainers.image.revision: ${BUILD_REVISION}
+  ocr:
+    image: sudoku-ocr:${BUILD_REVISION:?set BUILD_REVISION}
+    build:
+      labels:
+        org.opencontainers.image.revision: ${BUILD_REVISION}

@@ -1,0 +1,66 @@
+name: Build Sudoku
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sudoku-build-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    permissions:
+      contents: write
+    env:
+      COMPOSE_FILE: docker-compose.yml:.github/compose.build.yml
+      BUILD_REVISION: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Build and test Linux images
+        run: |
+          set -euo pipefail
+          export CITY_DB_PASSWORD="$(openssl rand -hex 32)"
+          export CITY_ADMIN_KEY="$(openssl rand -hex 32)"
+          trap 'docker compose down --volumes' EXIT
+          docker compose build app ocr
+          docker compose up -d --no-build --wait --wait-timeout 120
+          curl -fsS --retry 6 --retry-connrefused http://127.0.0.1:8000/health | jq -e '.status == "ok"'
+          curl -fsS http://127.0.0.1:8080/dist/app.js -o /dev/null
+          python3 tests/city_integration.py http://127.0.0.1:8080
+          tables=$(docker compose exec -T db psql -U sudoku -Atc "SELECT count(*) FROM pg_tables WHERE schemaname='city'")
+          test "$tables" = 22
+          docker save "sudoku-web:$GITHUB_SHA" "sudoku-ocr:$GITHUB_SHA" | gzip -3 > sudoku-linux-amd64.tar.gz
+
+      - name: Publish tested build
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if [[ "$(gh api "repos/$GITHUB_REPOSITORY/commits/main" --jq .sha)" != "$GITHUB_SHA" ]]; then
+            echo "A newer commit is on main; skipping publication."
+            exit 0
+          fi
+          tag="build-$GITHUB_SHA"
+          asset=sudoku-linux-amd64.tar.gz
+          if gh release view "$tag" --json isDraft > "$RUNNER_TEMP/release.json"; then
+            if jq -e '.isDraft == false' "$RUNNER_TEMP/release.json" >/dev/null; then
+              gh api "repos/$GITHUB_REPOSITORY/releases/tags/$tag" |
+                jq -e --arg name "$asset" 'any(.assets[]; .name == $name and .state == "uploaded" and (.digest | startswith("sha256:")))'
+              exit 0
+            fi
+          else
+            gh release create "$tag" --target "$GITHUB_SHA" --draft --prerelease --latest=false \
+              --title "Build ${GITHUB_SHA:0:12}" --notes "Tested Linux/amd64 web and OCR images for $GITHUB_SHA."
+          fi
+          gh release upload "$tag" "$asset" --clobber
+          gh release edit "$tag" --draft=false --prerelease --latest=false

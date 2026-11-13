@@ -35,6 +35,7 @@ docker compose up --build -d
 - **Клиент** написан на TypeScript. Классическая игра хранит партию в `localStorage`, а у личной кампании отдельные сохранения и очередь офлайн-результатов. [Классическая игра](src/client/main.ts) · [Городские режимы](src/client/city/)
 - **Сервер** на Rust и Axum раздаёт клиент, ведёт матчи и проверяет решения. Фото он передаёт отдельному сервису OCR на Python и FastAPI. [Городской API](src/server/city/mod.rs) · [API решения и сканирования](API.md) · [OCR](ocr/)
 - **PostgreSQL 16** хранит в схеме `city` 22 таблицы и два представления. При первом запуске приложение загружает 72 судоку. Данные сохраняются в томе Compose `city-data`, координаты районов и дороги матча — в `matches.layout` типа `jsonb`. [Схема](src/server/city/schema.sql) · [Инициализация и миграция](src/server/city/mod.rs) · [Генератор планировки](src/server/city/match_layout.rs)
+- **Сборки для Linux/amd64** публикуются после push в `main`. GitHub Actions проверяет веб-приложение и OCR, запускает матч 2×2 с PostgreSQL и прикладывает два образа в архиве `sudoku-linux-amd64.tar.gz` к релизу `build-<commit>`. [Workflow](.github/workflows/build.yml) · [Сборки](https://github.com/Imnotegor/sudoku/releases)
 
 ## English
 
@@ -46,4 +47,4 @@ In **City battle**, share a room link with three other players. The 25-minute ma
 
 Run `docker compose up --build -d` from the repository root, then open [localhost:8080](http://localhost:8080/). Compose starts the Rust application, the Python OCR service and PostgreSQL 16. The server initializes 22 tables, two views and 72 puzzles. The `city-data` volume persists game data between restarts.
 
-To use the [local admin panel](http://localhost:8080/?mode=admin), set `CITY_ADMIN_KEY` in the root `.env` file to a random key of at least 32 characters. Generate one with `openssl rand -hex 32`, run `docker compose up -d app` and enter the same key in the browser. Organizers can publish maps, host timed matches and review disputed scores.
+To use the [local admin panel](http://localhost:8080/?mode=admin), set `CITY_ADMIN_KEY` in the root `.env` file to a random key of at least 32 characters. Generate one with `openssl rand -hex 32`, run `docker compose up -d app` and enter the same key in the browser. Organizers can publish maps, host timed matches and review disputed scores. Pushes to `main` trigger the [build workflow](.github/workflows/build.yml). It tests a four-player match and publishes the Linux/amd64 web and OCR images in a [build release](https://github.com/Imnotegor/sudoku/releases).
