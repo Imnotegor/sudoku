@@ -207,67 +207,121 @@ code,
   border-width: 1px 0;
   border-radius: 0;
 }
+.city-map atlas-scenery,
 .city-map canvas {
   display: block;
-  width: 100%;
-  height: 100%;
   position: absolute;
   inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.city-map canvas + canvas {
+  pointer-events: none;
 }
 .atlas .map-pin {
   position: absolute;
-  transform: translate(-50%, -50%);
-  background: transparent;
-  color: #273f40;
-  border: 0;
-  padding: 0;
+  transform: translateX(-50%);
   display: grid;
   justify-items: center;
   gap: 2px;
-  line-height: 1.08;
+  padding: 2px 0 3px;
+  border: 0;
+  background: transparent;
+  color: #373c32;
+  line-height: 1.1;
+  --pin-ink: #716a54;
+  --pin-paper: #fff6db;
 }
-.map-pin i {
-  display: block;
-  width: 16px;
-  height: 16px;
-  background: #fff9e4;
-  border: 3px solid #355556;
-  transform: rotate(45deg);
-  box-shadow: 0 0 0 2px #f8f8e8;
+.atlas .map-pin::before {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 20px;
+  bottom: 100%;
 }
 .map-pin b,
 .map-pin small {
-  padding: 3px 5px;
-  background: #fffdf1;
-  font:
-    600 clamp(0.64rem, 1.4vw, 0.9rem) / 1.12 Arial,
-    sans-serif;
-  border-radius: 2px;
+  max-width: clamp(6.6rem, 17vw, 10rem);
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
+  border-radius: 3px;
+  font:
+    650 clamp(0.68rem, 1.35vw, 0.9rem) / 1.2 Arial,
+    sans-serif;
+}
+.map-pin b {
+  color: var(--pin-ink);
+  background: var(--pin-paper);
+  border: 1px solid var(--pin-ink);
+  padding: 2px 6px;
+  box-shadow: 1px 2px 0 #665d452b;
+  transition: transform 0.18s ease;
 }
 .map-pin small {
-  font-weight: 400;
-  font-size: 0.67rem;
-  padding-top: 1px;
+  font:
+    600 0.69rem/1.15 ui-monospace,
+    monospace;
+  padding: 2px 5px;
+  background: #fff9e7ed;
+  color: #414c43;
 }
-.map-pin.blue i {
-  background: #3683aa;
+.map-pin.blue {
+  --pin-ink: #174864;
+  --pin-paper: #ddebf1;
 }
-.map-pin.amber i {
-  background: #e6a451;
+.map-pin.amber {
+  --pin-ink: #70400f;
+  --pin-paper: #ffe3a9;
 }
-.map-pin.complete i {
-  background: #23756a;
+.map-pin.contested b {
+  border-bottom: 3px solid transparent;
+  border-image: linear-gradient(90deg, #30769b 50%, #b97a32 50%) 1;
 }
-.map-pin.contested i {
-  background: linear-gradient(90deg, #4985a6 50%, #d69747 50%);
+.map-pin.complete {
+  --pin-ink: #275d4f;
+  --pin-paper: #d9ecd5;
+}
+.map-pin.locked {
+  --pin-ink: #665f55;
+  --pin-paper: #eae4d6;
 }
 .atlas .map-pin:disabled {
   opacity: 1;
 }
-.map-pin.locked {
-  filter: grayscale(1);
-  opacity: 0.7 !important;
+.atlas button.map-pin:not(:disabled):hover b,
+.atlas button.map-pin:focus-visible b {
+  transform: translateY(-2px);
+}
+.atlas .city-map .map-motion {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid #8f8d75;
+  border-radius: 50%;
+  background: #fff7e1e8;
+  color: #344940;
+  font:
+    700 13px/1 Arial,
+    sans-serif;
+}
+.atlas .city-map .map-motion[hidden] {
+  display: none;
+}
+.map-cap .map-cycle {
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: transparent;
+}
+@media (prefers-reduced-motion: reduce) {
+  .map-pin b {
+    transition: none;
+  }
 }
 .solo-choices {
   padding: 24px 0;

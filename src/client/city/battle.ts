@@ -159,6 +159,7 @@ export async function battle() {
         draw();
         document.getElementById("history")!.scrollIntoView();
       },
+      m.code,
     );
     for (const t of m.teams) button("join-" + t.side, () => join(t.side));
     const filter = document.getElementById(
